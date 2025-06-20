@@ -3,15 +3,14 @@ import axios from 'axios';
 // API base configuration
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3004/api';
 
-console.log('API Base URL:', API_BASE_URL); // Debug uchun
+// Debug only in development
+if (process.env.NODE_ENV === 'development') {
+  console.log('API Base URL:', API_BASE_URL);
+}
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-<<<<<<< HEAD
   timeout: 30000, // 30 sekund
-=======
-  timeout: 60000,
->>>>>>> e7b5deed4789e982bbdc154d2d995afd3ac9e94f
   headers: {
     'Content-Type': 'application/json',
   },

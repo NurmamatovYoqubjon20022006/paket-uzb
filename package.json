@@ -40,13 +40,12 @@
   "engines": {
     "node": ">=16.0.0",
     "npm": ">=8.0.0"
-  },
-  "repository": {
+  },  "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/paket-uzb.git"
+    "url": "https://github.com/NurmamatovYoqubjon20022006/paket-uzb.git"
   },
   "bugs": {
-    "url": "https://github.com/your-username/paket-uzb/issues"
+    "url": "https://github.com/NurmamatovYoqubjon20022006/paket-uzb/issues"
   },
   "homepage": "https://paket-uzb.vercel.app"
 }
