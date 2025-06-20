@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useCart } from '../App';
+import { useLanguage } from '../contexts/LanguageContext';
 import { toast } from 'react-toastify';
 import * as api from '../services/api';
 
 const CartPage = () => {
   const { cart, removeFromCart, updateQuantity, clearCart, getCartTotal } = useCart();
+  const { currentLanguage } = useLanguage();
   const [isOrdering, setIsOrdering] = useState(false);
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [orderForm, setOrderForm] = useState({
@@ -30,14 +32,17 @@ const CartPage = () => {
 
   const handleOrder = async (e) => {
     e.preventDefault();
-    
-    if (cart.length === 0) {
-      toast.error('Savat bo\'sh!');
+      if (cart.length === 0) {
+      toast.error(currentLanguage === 'uz' ? 'Savat bo\'sh!' :
+                  currentLanguage === 'ru' ? 'Корзина пуста!' :
+                  'Cart is empty!');
       return;
     }
 
     if (!orderForm.name || !orderForm.phone || !orderForm.address) {
-      toast.error('Barcha majburiy maydonlarni to\'ldiring!');
+      toast.error(currentLanguage === 'uz' ? 'Barcha majburiy maydonlarni to\'ldiring!' :
+                  currentLanguage === 'ru' ? 'Заполните все обязательные поля!' :
+                  'Fill in all required fields!');
       return;
     }
 

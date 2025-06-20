@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useProducts, useCart } from '../App';
+import { useLanguage } from '../contexts/LanguageContext';
 import LoadingSpinner from '../components/UI/LoadingSpinner';
 import ProductCard from '../components/Product/ProductCard';
 import * as api from '../services/api';
@@ -34,6 +35,7 @@ const StarIcon = () => (
 const HomePage = () => {
   const { products, isLoading, fetchProducts } = useProducts();
   const { addToCart } = useCart();
+  const { t } = useLanguage();
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [apiProducts, setApiProducts] = useState([]);
 
@@ -64,52 +66,49 @@ const HomePage = () => {
       setFeaturedProducts(apiProducts.slice(0, 6));
     }
   }, [products, apiProducts]);
-
   const features = [
     {
       icon: <ShieldIcon />,
-      title: 'Sifat Kafolati',
-      description: 'Barcha mahsulotlarimiz yuqori sifat standartlariga mos keladi',
+      title: t('features.quality.title'),
+      description: t('features.quality.description'),
       color: 'text-green-600 bg-green-100'
     },
     {
       icon: <TruckIcon />,
-      title: 'Tez Yetkazib Berish',
-      description: 'O\'zbekiston bo\'ylab 1-3 ish kunida yetkazib berish',
+      title: t('features.delivery.title'),
+      description: t('features.delivery.description'),
       color: 'text-blue-600 bg-blue-100'
     },
     {
       icon: <SupportIcon />,
-      title: '24/7 Qo\'llab-quvvatlash',
-      description: 'Har qanday savolingiz bo\'yicha yordam berishga tayyormiz',
+      title: t('features.support.title'),
+      description: t('features.support.description'),
       color: 'text-purple-600 bg-purple-100'
     }
   ];
-
   const stats = [
-    { value: '10,000+', label: 'Mamnun mijozlar' },
-    { value: '50+', label: 'Mahsulot turlari' },
-    { value: '99%', label: 'Sifat ko\'rsatkichi' },
-    { value: '24/7', label: 'Qo\'llab-quvvatlash' }
+    { value: '10,000+', label: t('stats.customers') },
+    { value: '50+', label: t('stats.products') },
+    { value: '99%', label: t('stats.quality') },
+    { value: '24/7', label: t('stats.support') }
   ];
-
   const testimonials = [
     {
-      name: 'Ahmadjon Karimov',
-      role: 'Do\'kon egasi',
-      content: 'Paket UZB dan paketlar olishni boshlaganimdan beri mijozlarim juda mamnun. Sifat zo\'r!',
+      name: t('testimonials.customer1.name'),
+      role: t('testimonials.customer1.role'),
+      content: t('testimonials.customer1.content'),
       rating: 5
     },
     {
-      name: 'Nodira Abdullayeva',
-      role: 'Apteka direktori',
-      content: 'Tez yetkazib berish va sifatli xizmat. Har doim o\'z vaqtida buyurtmalarimni olib kelishadi.',
+      name: t('testimonials.customer2.name'),
+      role: t('testimonials.customer2.role'),
+      content: t('testimonials.customer2.content'),
       rating: 5
     },
     {
-      name: 'Bobur Ergashev',
-      role: 'Biznes egasi',
-      content: 'Narxlar maqul va sifat yuqori. Barcha do\'stlarimga tavsiya qilaman.',
+      name: t('testimonials.customer3.name'),
+      role: t('testimonials.customer3.role'),
+      content: t('testimonials.customer3.content'),
       rating: 5
     }
   ];
@@ -133,21 +132,17 @@ const HomePage = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               className="text-center lg:text-left"
-            >
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                Sifatli Paketlar
-                <span className="text-yellow-400 block">Ishonchli Hamkor</span>
+            >              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                {t('heroTitle')}
               </h1>
               <p className="text-xl lg:text-2xl mb-8 text-blue-100 leading-relaxed">
-                Do'konlar, aptekalar va bizneslar uchun eng yaxshi selofan va rulon paketlar. 
-                Yuqori sifat, maqul narxlar va tez yetkazib berish.
+                {t('heroSubtitle')}
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Link
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">                <Link
                   to="/products"
                   className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-700 font-semibold rounded-xl hover:bg-blue-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
-                  Mahsulotlarni Ko'rish
+                  {t('common.viewProducts')}
                   <svg className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -156,7 +151,7 @@ const HomePage = () => {
                   to="/contact"
                   className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white font-semibold rounded-xl hover:bg-white hover:text-blue-700 transition-all duration-300"
                 >
-                  Bog'lanish
+                  {t('common.contact')}
                 </Link>
               </div>
             </motion.div>
@@ -199,12 +194,11 @@ const HomePage = () => {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
             className="text-center mb-16"
-          >
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Nega Bizni Tanlashadi?
+          >            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              {t('features.sectionTitle')}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Biz mijozlarimizga eng yaxshi xizmat va sifatli mahsulotlarni taqdim etishga intilamiz
+              {t('features.sectionDescription')}
             </p>
           </motion.div>
 
@@ -259,12 +253,11 @@ const HomePage = () => {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
             className="text-center mb-16"
-          >
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Mashhur Mahsulotlar
+          >            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              {t('products.featured.title')}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-              Mijozlarimiz orasida eng ko'p sotilgan va mashhur mahsulotlarimiz
+              {t('products.featured.description')}
             </p>
           </motion.div>
 
@@ -286,14 +279,13 @@ const HomePage = () => {
                 </motion.div>
               ))}
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-600 mb-4">Mahsulotlar yuklanmoqda...</p>
+          ) : (            <div className="text-center py-12">
+              <p className="text-gray-600 mb-4">{t('products.loading')}</p>
               <button 
                 onClick={() => window.location.reload()} 
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
               >
-                Qayta yuklash
+                {t('common.reload')}
               </button>
             </div>
           )}
@@ -304,12 +296,11 @@ const HomePage = () => {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
             className="text-center mt-12"
-          >
-            <Link
+          >            <Link
               to="/products"
               className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
             >
-              Barcha Mahsulotlar
+              {t('common.allProducts')}
               <svg className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -327,12 +318,11 @@ const HomePage = () => {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
             className="text-center mb-16"
-          >
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Mijozlar Fikrlari
+          >            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              {t('testimonials.sectionTitle')}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Bizning xizmatimizdan mamnun mijozlarimizning fikr-mulohazalari
+              {t('testimonials.sectionDescription')}
             </p>
           </motion.div>
 
@@ -388,20 +378,18 @@ const HomePage = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-          >
-            <h2 className="text-3xl lg:text-4xl font-bold mb-6">
-              Buyurtma Berishga Tayyormisiz?
+          >            <h2 className="text-3xl lg:text-4xl font-bold mb-6">
+              {t('cta.title')}
             </h2>
             <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-              Bizning sifatli mahsulotlarimiz bilan o'z biznesingizni yangi bosqichga ko'taring. 
-              Bugun buyurtma bering va tez yetkazib berish xizmatidan foydalaning.
+              {t('cta.description')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/products"
                 className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-700 font-semibold rounded-xl hover:bg-blue-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               >
-                Hozir Buyurtma Bering
+                {t('cta.orderNow')}
                 <svg className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5H6m1 0V13m0 0h3" />
                 </svg>
@@ -410,7 +398,7 @@ const HomePage = () => {
                 to="/contact"
                 className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white font-semibold rounded-xl hover:bg-white hover:text-blue-700 transition-all duration-300"
               >
-                Maslahat Olish
+                {t('cta.getAdvice')}
                 <svg className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>

@@ -113,7 +113,7 @@ class GoogleSheetsManager {
     }
   }
 
-  async addOrder(order) {
+  async addOrderToSheet(order) {
     if (!this.spreadsheetId) {
       console.warn('⚠️ Google Sheets ID not configured');
       return false;

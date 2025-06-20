@@ -3,19 +3,22 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+// Import contexts
+import { LanguageProvider } from './contexts/LanguageContext';
+
 // Import components
 import Navbar from './components/Layout/Navbar';
 import Footer from './components/Layout/Footer';
 import LoadingSpinner from './components/UI/LoadingSpinner';
 import ErrorBoundary from './components/UI/ErrorBoundary';
-import OrderForm from './components/OrderForm';
 
 // Import pages
-import HomePage from './pages/HomePage';
+import HomePage from './pages/ImprovedHomePage';
 import ProductsPage from './pages/ProductsPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 // Import services
@@ -154,17 +157,20 @@ const ProductsProvider = ({ children }) => {
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-
   const fetchProducts = async (filters = {}) => {
     setIsLoading(true);
     setError(null);
     try {
+      console.log('🔄 Mahsulotlarni yuklash boshlandi...');
       const response = await api.getProducts(filters);
+      console.log('✅ Mahsulotlar muvaffaqiyatli yuklandi:', response.products?.length);
       setProducts(response.products || []);
       return response;
     } catch (error) {
-      setError('Mahsulotlarni yuklashda xatolik yuz berdi');
-      toast.error('Mahsulotlarni yuklashda xatolik!', { autoClose: 3000 });
+      console.error('❌ Mahsulot yuklash xatosi:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Mahsulotlarni yuklashda xatolik';
+      setError(errorMessage);
+      toast.error(`Xatolik: ${errorMessage}`, { autoClose: 5000 });
       return { products: [], totalPages: 0 };
     } finally {
       setIsLoading(false);
@@ -216,39 +222,13 @@ const ProductsProvider = ({ children }) => {
   );
 };
 
-// Simple Cart Page
+// Simple Cart Page - OrderForm o'chirildi, CheckoutPage ishlatiladi
+// eslint-disable-next-line no-unused-vars
 const CartPageSimple = () => {
   const { cart, removeFromCart, updateQuantity, clearCart, getCartTotal } = useCart();
-  const [showOrderForm, setShowOrderForm] = useState(false);
   
   const total = getCartTotal();
   const deliveryFee = cart.length > 0 ? 50000 : 0;
-
-  if (showOrderForm) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="mb-6">
-            <button
-              onClick={() => setShowOrderForm(false)}
-              className="flex items-center text-blue-600 hover:text-blue-700"
-            >
-              <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Savatga qaytish
-            </button>
-          </div>
-          <OrderForm 
-            cart={cart} 
-            clearCart={clearCart}
-            onClose={() => setShowOrderForm(false)}
-          />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
@@ -327,12 +307,12 @@ const CartPageSimple = () => {
               </div>
               
               <div className="mt-6 space-y-4">
-                <button 
-                  onClick={() => setShowOrderForm(true)}
-                  className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                <Link 
+                  to="/checkout"
+                  className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors text-center block"
                 >
                   Buyurtma Berish
-                </button>
+                </Link>
                 <button 
                   onClick={clearCart}
                   className="w-full bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300"
@@ -349,6 +329,7 @@ const CartPageSimple = () => {
 };
 
 // Simple Contact Page
+// eslint-disable-next-line no-unused-vars
 const ContactPageSimple = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -435,45 +416,46 @@ const App = () => {
   if (isAppLoading) {
     return <LoadingSpinner fullScreen />;
   }
-
   return (
     <ErrorBoundary>
-      <ProductsProvider>
-        <CartProvider>
-          <Router>
-            <div className="min-h-screen bg-gray-50 flex flex-col">
-              <ToastContainer
-                position="top-right"
-                autoClose={3000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="light"
-                className="z-50"
-              />
+      <LanguageProvider>
+        <ProductsProvider>
+          <CartProvider>
+            <Router>
+              <div className="min-h-screen bg-gray-50 flex flex-col">
+                <ToastContainer
+                  position="top-right"
+                  autoClose={3000}
+                  hideProgressBar={false}
+                  newestOnTop={false}
+                  closeOnClick
+                  rtl={false}
+                  pauseOnFocusLoss
+                  draggable
+                  pauseOnHover
+                  theme="light"
+                  className="z-50"
+                />
 
-              <Navbar />
+                <Navbar />
 
-              <main className="flex-grow pt-16">
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/products" element={<ProductsPage />} />
-                  <Route path="/about" element={<AboutPage />} />
-                  <Route path="/contact" element={<ContactPageSimple />} />
-                  <Route path="/cart" element={<CartPageSimple />} />
-                  <Route path="*" element={<NotFoundPage />} />
-                </Routes>
-              </main>
+                <main className="flex-grow pt-16">                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/products" element={<ProductsPage />} />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/cart" element={<CartPage />} />
+                    <Route path="/checkout" element={<CheckoutPage />} />
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Routes>
+                </main>
 
-              <Footer />
-            </div>
-          </Router>
-        </CartProvider>
-      </ProductsProvider>
+                <Footer />
+              </div>
+            </Router>
+          </CartProvider>
+        </ProductsProvider>
+      </LanguageProvider>
     </ErrorBoundary>
   );
 };

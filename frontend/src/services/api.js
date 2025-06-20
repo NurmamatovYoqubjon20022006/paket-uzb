@@ -7,7 +7,7 @@ console.log('API Base URL:', API_BASE_URL); // Debug uchun
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 30000, // 30 sekund
   headers: {
     'Content-Type': 'application/json',
   },
@@ -21,9 +21,14 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Add timestamp to prevent caching issues
+    config.headers['X-Requested-At'] = new Date().toISOString();
+    
     return config;
   },
   (error) => {
+    console.error('Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
@@ -34,23 +39,54 @@ apiClient.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    const message = error.response?.data?.message || error.message || 'Network error occurred';
+    let message = 'Tarmoq xatosi yuz berdi';
     
-    // Handle specific error codes
-    if (error.response?.status === 401) {
-      // Handle unauthorized access
-      localStorage.removeItem('auth_token');
-      window.location.href = '/login';
+    if (error.response) {
+      // Server responded with error status
+      message = error.response.data?.message || `Server xatosi: ${error.response.status}`;
+      
+      // Handle specific error codes
+      if (error.response.status === 401) {
+        localStorage.removeItem('auth_token');
+        window.location.href = '/login';
+      } else if (error.response.status === 404) {
+        message = 'So\'ralgan ma\'lumot topilmadi';
+      } else if (error.response.status >= 500) {
+        message = 'Server xatosi. Keyinroq urinib ko\'ring';
+      }
+    } else if (error.request) {
+      // Request was made but no response received
+      message = 'Server bilan bog\'lanishda xatolik';
+    } else {
+      // Something else happened
+      message = error.message || 'Noma\'lum xatolik';
     }
     
+    console.error('API Error:', error);
     return Promise.reject(new Error(message));
   }
 );
 
+// Test connection
+export const testConnection = async () => {
+  try {
+    console.log('🔍 Testing connection to:', API_BASE_URL);
+    const response = await apiClient.get('/health');
+    console.log('✅ Connection test successful:', response);
+    return response;
+  } catch (error) {
+    console.error('❌ Connection test failed:', error.message);
+    throw new Error(`Server bilan bog'lanib bo'lmadi: ${API_BASE_URL}. Server ishga tushganligini tekshiring.`);
+  }
+};
+
 // Products API
 export const getProducts = async (filters = {}) => {
   try {
-    console.log('Fetching products with filters:', filters); // Debug
+    console.log('🔄 Fetching products with filters:', filters);
+    
+    // Test connection first
+    await testConnection();
     
     const params = new URLSearchParams();
     

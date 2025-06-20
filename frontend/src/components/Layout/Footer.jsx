@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 // Icons
 const PhoneIcon = () => (
@@ -41,26 +42,73 @@ const InstagramIcon = () => (
 );
 
 const Footer = () => {
+  const { currentLanguage } = useLanguage();
   const currentYear = new Date().getFullYear();
 
   const quickLinks = [
-    { label: 'Bosh Sahifa', to: '/' },
-    { label: 'Mahsulotlar', to: '/products' },
-    { label: 'Biz Haqimizda', to: '/about' },
-    { label: 'Aloqa', to: '/contact' },
+    { 
+      label: currentLanguage === 'uz' ? 'Bosh Sahifa' :
+              currentLanguage === 'ru' ? 'Главная' :
+              'Home', 
+      to: '/' 
+    },
+    { 
+      label: currentLanguage === 'uz' ? 'Mahsulotlar' :
+              currentLanguage === 'ru' ? 'Товары' :
+              'Products', 
+      to: '/products' 
+    },
+    { 
+      label: currentLanguage === 'uz' ? 'Biz Haqimizda' :
+              currentLanguage === 'ru' ? 'О нас' :
+              'About Us', 
+      to: '/about' 
+    },
+    { 
+      label: currentLanguage === 'uz' ? 'Aloqa' :
+              currentLanguage === 'ru' ? 'Контакты' :
+              'Contact', 
+      to: '/contact' 
+    },
   ];
 
   const categories = [
-    { label: 'Selofan Paketlar', to: '/products?category=Selofan' },
-    { label: 'Rulon Paketlar', to: '/products?category=Rulon' },
-    { label: 'Aksessuarlar', to: '/products?category=Aksessuarlar' },
+    { 
+      label: currentLanguage === 'uz' ? 'Selofan Paketlar' :
+              currentLanguage === 'ru' ? 'Пакеты из целлофана' :
+              'Cellophane Bags', 
+      to: '/products?category=Selofan' 
+    },
+    { 
+      label: currentLanguage === 'uz' ? 'Rulon Paketlar' :
+              currentLanguage === 'ru' ? 'Рулонные пакеты' :
+              'Roll Bags', 
+      to: '/products?category=Rulon' 
+    },
+    { 
+      label: currentLanguage === 'uz' ? 'Aksessuarlar' :
+              currentLanguage === 'ru' ? 'Аксессуары' :
+              'Accessories', 
+      to: '/products?category=Aksessuarlar' 
+    },
   ];
 
   const services = [
-    'Bepul yetkazib berish',
-    'Sifat kafolati',
-    'Tez yetkazib berish',
-    '24/7 qo\'llab-quvvatlash',
+    currentLanguage === 'uz' ? 'Bepul yetkazib berish' :
+    currentLanguage === 'ru' ? 'Бесплатная доставка' :
+    'Free delivery',
+    
+    currentLanguage === 'uz' ? 'Sifat kafolati' :
+    currentLanguage === 'ru' ? 'Гарантия качества' :
+    'Quality guarantee',
+    
+    currentLanguage === 'uz' ? 'Tez yetkazib berish' :
+    currentLanguage === 'ru' ? 'Быстрая доставка' :
+    'Fast delivery',
+    
+    currentLanguage === 'uz' ? '24/7 qo\'llab-quvvatlash' :
+    currentLanguage === 'ru' ? 'Поддержка 24/7' :
+    '24/7 support',
   ];
 
   return (

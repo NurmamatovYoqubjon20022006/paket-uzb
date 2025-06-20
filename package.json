@@ -1,0 +1,52 @@
+{
+  "name": "paket-uzb",
+  "version": "1.0.0",
+  "description": "Paket UZB - E-commerce platform for packaging materials in Uzbekistan",
+  "main": "start.js",
+  "scripts": {
+    "start": "node start.js",
+    "start:backend": "cd backend && npm run dev",
+    "start:frontend": "cd frontend && npm start",
+    "build": "cd frontend && npm run build",
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "test": "cd backend && npm test && cd ../frontend && npm test",
+    "clean": "rimraf node_modules backend/node_modules frontend/node_modules",
+    "postinstall": "npm run install:all",
+    "deploy": "npm run build && npm run deploy:vercel",
+    "deploy:vercel": "cd backend && vercel --prod && cd ../frontend && vercel --prod",
+    "deploy:google": "bash deploy-to-google.sh",
+    "deploy:google:win": "deploy-to-google.bat",
+    "health-check": "curl http://localhost:3004/api/health",
+    "production-test": "test-production-ready.bat"
+  },
+  "keywords": [
+    "ecommerce",
+    "packaging",
+    "uzbekistan",
+    "react",
+    "nodejs",
+    "express",
+    "mongodb"
+  ],
+  "author": "Paket UZB Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "rimraf": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/paket-uzb.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/paket-uzb/issues"
+  },
+  "homepage": "https://paket-uzb.vercel.app"
+}

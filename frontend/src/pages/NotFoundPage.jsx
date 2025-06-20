@@ -1,8 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const NotFoundPage = () => {
+  const { currentLanguage } = useLanguage();
+  
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <motion.div
@@ -27,12 +30,15 @@ const NotFoundPage = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
           className="mb-8"
-        >
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Sahifa Topilmadi
+        >          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            {currentLanguage === 'uz' ? 'Sahifa Topilmadi' :
+             currentLanguage === 'ru' ? 'Страница не найдена' :
+             'Page Not Found'}
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-md mx-auto">
-            Kechirasiz, siz qidirayotgan sahifa mavjud emas yoki o'chirilgan bo'lishi mumkin.
+            {currentLanguage === 'uz' ? 'Kechirasiz, siz qidirayotgan sahifa mavjud emas yoki o\'chirilgan bo\'lishi mumkin.' :
+             currentLanguage === 'ru' ? 'Извините, страница, которую вы ищете, не существует или могла быть удалена.' :
+             'Sorry, the page you are looking for does not exist or may have been deleted.'}
           </p>
         </motion.div>
 
@@ -49,8 +55,9 @@ const NotFoundPage = () => {
           >
             <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            Bosh Sahifaga Qaytish
+            </svg>            {currentLanguage === 'uz' ? 'Bosh Sahifaga Qaytish' :
+             currentLanguage === 'ru' ? 'Вернуться на главную' :
+             'Return to Home'}
           </Link>
           
           <Link
@@ -60,7 +67,9 @@ const NotFoundPage = () => {
             <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
-            Mahsulotlar
+            {currentLanguage === 'uz' ? 'Mahsulotlar' :
+             currentLanguage === 'ru' ? 'Товары' :
+             'Products'}
           </Link>
         </motion.div>
 
@@ -70,9 +79,10 @@ const NotFoundPage = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
           className="mt-12 pt-8 border-t border-gray-200"
-        >
-          <p className="text-gray-500 mb-4">
-            Yordam kerakmi? Biz bilan bog'laning:
+        >          <p className="text-gray-500 mb-4">
+            {currentLanguage === 'uz' ? 'Yordam kerakmi? Biz bilan bog\'laning:' :
+             currentLanguage === 'ru' ? 'Нужна помощь? Свяжитесь с нами:' :
+             'Need help? Contact us:'}
           </p>
           <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-6">
             <a
@@ -92,7 +102,9 @@ const NotFoundPage = () => {
               <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              Aloqa formi
+              {currentLanguage === 'uz' ? 'Aloqa formi' :
+               currentLanguage === 'ru' ? 'Форма обратной связи' :
+               'Contact form'}
             </Link>
           </div>
         </motion.div>
@@ -106,7 +118,9 @@ const NotFoundPage = () => {
         >
           <div className="text-6xl mb-4">📦</div>
           <p className="text-gray-400 text-sm">
-            Bizning paketlar kabi, bu sahifa ham yo'qolgan...
+            {currentLanguage === 'uz' ? 'Bizning paketlar kabi, bu sahifa ham yo\'qolgan...' :
+             currentLanguage === 'ru' ? 'Как и наши пакеты, эта страница тоже потерялась...' :
+             'Like our packages, this page has also gone missing...'}
           </p>
         </motion.div>
       </motion.div>

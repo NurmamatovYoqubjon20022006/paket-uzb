@@ -3,9 +3,12 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const axios = require('axios');
-// server.js
-require('dotenv').config();
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
 
+// Load environment variables
+require('dotenv').config();
 
 // Import models
 const Order = require('./models/Order');
@@ -16,17 +19,78 @@ const Contact = require('./models/Contact');
 const telegramBot = require('./utils/telegramBot');
 const googleSheets = require('./utils/googleSheets');
 
-dotenv.config();
+// Import routes
+const ordersRoute = require('./routes/orders');
+const productsRoute = require('./routes/products');
+
 const app = express();
 
-// Middleware
-app.use(cors({
-  origin: ['http://localhost:3000', 'https://your-domain.com'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: false, // Frontend uchun
+  crossOriginEmbedderPolicy: false
 }));
+
+// Compression middleware
+app.use(compression());
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 daqiqa
+  max: 100, // maksimal 100 ta so'rov
+  message: {
+    error: 'Juda ko\'p so\'rov yuborildi, keyinroq urinib ko\'ring'
+  }
+});
+app.use(limiter);
+
+// CORS configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = process.env.NODE_ENV === 'production' 
+      ? [process.env.FRONTEND_URL, 'https://paket-uzb.vercel.app']
+      : [
+          'http://localhost:3000', 
+          'http://localhost:3001', 
+          'http://127.0.0.1:3000',
+          'http://localhost:3004'  // Backend o'zi ham
+        ];
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(null, true); // Development da ruxsat berish
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-At'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
+
+// Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Routes middleware
+app.use('/api/orders', ordersRoute);
+app.use('/api/products', productsRoute);
+
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -57,9 +121,7 @@ async function initializeSampleProducts() {
     console.log('🗑️ Existing products cleared');
     
     const count = await Product.countDocuments();
-    if (count === 0) {
-      const sampleProducts = [
-        {
+    if (count === 0) {      const sampleProducts = [        {
           name: 'Selofan Paket Kichik',
           description: 'Do\'konlar uchun kichik o\'lchamdagi selofan paket',
           category: 'Selofan',
@@ -67,7 +129,8 @@ async function initializeSampleProducts() {
           price: 500,
           inStock: true,
           quantity: 1000,
-          images: ['https://picsum.photos/400/300?random=1'],
+          status: 'active',
+          images: ['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=300&fit=crop'],
           specifications: {
             material: 'Yuqori sifatli selofan',
             thickness: '25 mikron',
@@ -90,7 +153,8 @@ async function initializeSampleProducts() {
           price: 800,
           inStock: true,
           quantity: 800,
-          images: ['https://picsum.photos/400/300?random=2'],
+          status: 'active',
+          images: ['https://images.unsplash.com/photo-1572635196243-4dd75fbdbd7f?w=400&h=300&fit=crop'],
           specifications: {
             material: 'Yuqori sifatli selofan',
             thickness: '30 mikron',
@@ -113,7 +177,8 @@ async function initializeSampleProducts() {
           price: 1200,
           inStock: true,
           quantity: 500,
-          images: ['https://picsum.photos/400/300?random=3'],
+          status: 'active',
+          images: ['https://images.unsplash.com/photo-1586769852044-692d6666f75a?w=400&h=300&fit=crop'],
           specifications: {
             material: 'Yuqori sifatli selofan',
             thickness: '35 mikron',
@@ -127,8 +192,7 @@ async function initializeSampleProducts() {
           seo: {
             slug: 'selofan-paket-katta'
           }
-        },
-        {
+        },        {
           name: 'Rulon Paket Kichik',
           description: 'Kichik bizneslar uchun rulon paket',
           category: 'Rulon',
@@ -136,7 +200,8 @@ async function initializeSampleProducts() {
           price: 1500,
           inStock: true,
           quantity: 200,
-          images: ['https://picsum.photos/400/300?random=4'],
+          status: 'active',
+          images: ['https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=400&h=300&fit=crop'],
           specifications: {
             material: 'Polietilen',
             length: '100 metr',
@@ -159,7 +224,8 @@ async function initializeSampleProducts() {
           price: 2500,
           inStock: true,
           quantity: 150,
-          images: ['https://picsum.photos/400/300?random=5'],
+          status: 'active',
+          images: ['https://images.unsplash.com/photo-1586769852019-e5b48648d27c?w=400&h=300&fit=crop'],
           specifications: {
             material: 'Polietilen',
             length: '100 metr', 
@@ -182,7 +248,8 @@ async function initializeSampleProducts() {
           price: 3500,
           inStock: true,
           quantity: 100,
-          images: ['https://picsum.photos/400/300?random=6'],
+          status: 'active',
+          images: ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop'],
           specifications: {
             material: 'Polietilen',
             length: '100 metr',
@@ -192,9 +259,56 @@ async function initializeSampleProducts() {
             quantity: 100,
             inStock: true,
             sku: 'RUL003'
+          },          seo: {
+            slug: 'rulon-paket-katta'
+          }
+        },
+        {
+          name: 'Plastik Paket Premium',
+          description: 'Yuqori sifatli plastik paket',
+          category: 'Plastik',
+          size: '25x35 sm',
+          price: 1000,
+          inStock: true,
+          quantity: 300,
+          status: 'active',
+          images: ['https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=300&fit=crop'],
+          specifications: {
+            material: 'Premium plastik',
+            thickness: '30 mikron',
+            color: 'Oq'
+          },
+          inventory: {
+            quantity: 300,
+            inStock: true,
+            sku: 'PLA001'
           },
           seo: {
-            slug: 'rulon-paket-katta'
+            slug: 'plastik-paket-premium'
+          }
+        },
+        {
+          name: 'Qog\'oz Paket Eco',
+          description: 'Ekologik toza qog\'oz paket',
+          category: 'Qogoz',
+          size: '20x25 sm',
+          price: 700,
+          inStock: true,
+          quantity: 400,
+          status: 'active',
+          images: ['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=300&fit=crop&blend=F5F5DC&blend-mode=multiply'],
+          specifications: {
+            material: 'Qayta ishlanadigan qog\'oz',
+            thickness: '150 gramm',
+            color: 'Jigarrang'
+          },
+          inventory: {
+            quantity: 400,
+            inStock: true,
+            sku: 'QOG001'
+          },
+          seo: {
+            slug: 'qogoz-paket-eco'
           }
         }
       ];
@@ -213,6 +327,11 @@ async function initializeSampleProducts() {
 app.get('/api/products', async (req, res) => {
   try {
     console.log('📦 Products API called with query:', req.query);
+    
+    // Set CORS headers manually
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     
     const { category, minPrice, maxPrice, search, page = 1, limit = 12 } = req.query;
     
@@ -237,10 +356,12 @@ app.get('/api/products', async (req, res) => {
     
     console.log('🔍 Filter being used:', filter);
     
+   // Add timeout to query
     const products = await Product.find(filter)
       .limit(limit * 1)
       .skip((page - 1) * limit)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .maxTimeMS(60000); // 60 seconds timeout
       
     const total = await Product.countDocuments(filter);
     
@@ -264,114 +385,9 @@ app.get('/api/products/:id', async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: 'Mahsulot topilmadi' });
     }
-    res.json(product);
-  } catch (error) {
+    res.json(product);  } catch (error) {
     console.error('Product fetch error:', error);
     res.status(500).json({ message: 'Mahsulotni olishda xato' });
-  }
-});
-
-// Orders endpoints
-app.post('/api/orders', async (req, res) => {
-  try {
-    const orderData = req.body;
-    console.log('📦 Received order data:', JSON.stringify(orderData, null, 2));
-    
-    // Validate required fields
-    if (!orderData.customer?.name || !orderData.customer?.phone) {
-      return res.status(400).json({ message: 'Mijoz ma\'lumotlari to\'liq emas' });
-    }
-    
-    if (!orderData.delivery?.address || !orderData.delivery?.city) {
-      return res.status(400).json({ message: 'Yetkazib berish ma\'lumotlari to\'liq emas' });
-    }
-    
-    if (!orderData.products || orderData.products.length === 0) {
-      return res.status(400).json({ message: 'Mahsulotlar ro\'yxati bo\'sh' });
-    }
-
-    // Generate order number
-    const orderNumber = generateOrderNumber();
-    
-    const order = new Order({
-      orderNumber,
-      products: orderData.products.map(item => ({
-        id: item.id,
-        name: item.name,
-        size: item.size,
-        price: item.price,
-        quantity: item.quantity,
-        image: item.image
-      })),
-      customer: {
-        name: orderData.customer.name,
-        phone: orderData.customer.phone,
-        email: orderData.customer.email
-      },
-      delivery: {
-        address: orderData.delivery.address,
-        city: orderData.delivery.city,
-        deliveryNotes: orderData.delivery.deliveryNotes
-      },
-      payment: {
-        method: orderData.payment?.method || 'cash',
-        status: 'pending'
-      },
-      pricing: {
-        subtotal: orderData.pricing?.subtotal || 0,
-        deliveryCost: orderData.pricing?.deliveryCost || 50000,
-        discount: orderData.pricing?.discount || 0,
-        totalPrice: orderData.pricing?.totalPrice || 0
-      },
-      notes: {
-        customerNotes: orderData.notes?.customerNotes
-      },
-      status: 'pending'
-    });
-    
-    await order.save();
-    console.log('✅ Order saved successfully:', order.orderNumber);
-    
-    // Send notifications
-    try {
-      await Promise.all([
-        telegramBot.sendOrderNotification(order),
-        googleSheets.addOrder(order)
-      ]);
-      console.log('✅ Notifications sent successfully');
-    } catch (notificationError) {
-      console.error('❌ Notification error:', notificationError.message);
-      // Don't fail the order creation if notifications fail
-    }
-    
-    res.status(201).json({
-      message: 'Buyurtma muvaffaqiyatli qabul qilindi!',
-      order: {
-        id: order._id,
-        orderNumber: order.orderNumber,
-        totalPrice: order.pricing.totalPrice,
-        status: order.status
-      }
-    });
-  } catch (error) {
-    console.error('❌ Order creation error:', error);
-    res.status(500).json({ 
-      message: 'Buyurtma yaratishda xato', 
-      error: error.message 
-    });
-  }
-});
-
-app.get('/api/orders/:id', async (req, res) => {
-  try {
-    const order = await Order.findById(req.params.id);
-    if (!order) {
-      return res.status(404).json({ message: 'Buyurtma topilmadi' });
-    }
-    res.json(order);
-  } catch (error) {
-    console.error('Order fetch error:', error);
-    res.status(500).json({ message: 'Buyurtmani olishda xato' });
   }
 });
 
@@ -430,20 +446,34 @@ app.post('/api/payment', async (req, res) => {
 // Contact endpoint
 app.post('/api/contact', async (req, res) => {
   try {
+    console.log('📞 Received contact form:', JSON.stringify(req.body, null, 2));
+    
     const contact = new Contact(req.body);
     await contact.save();
+    console.log('✅ Contact saved to database:', contact._id);
     
-    // Send notification to Telegram
+    // Send notifications
     try {
-      await telegramBot.sendContactNotification(contact);
+      await Promise.all([
+        telegramBot.sendContactNotification(contact),
+        googleSheets.addContact(contact)
+      ]);
+      console.log('✅ Contact notifications sent successfully');
     } catch (notificationError) {
-      console.error('Contact notification error:', notificationError);
+      console.error('❌ Contact notification error:', notificationError.message);
+      // Don't fail the contact creation if notifications fail
     }
     
-    res.status(201).json({ message: 'Murojaat muvaffaqiyatli yuborildi!' });
+    res.status(201).json({ 
+      message: 'Murojaat muvaffaqiyatli yuborildi!',
+      contactId: contact._id 
+    });
   } catch (error) {
-    console.error('Contact error:', error);
-    res.status(500).json({ message: 'Murojaat saqlashda xato' });
+    console.error('❌ Contact creation error:', error);
+    res.status(500).json({ 
+      message: 'Murojaat saqlashda xato',
+      error: error.message 
+    });
   }
 });
 

@@ -12,11 +12,10 @@ const productSchema = new mongoose.Schema({
     required: true,
     trim: true,
     maxlength: 1000
-  },
-  category: {
+  },  category: {
     type: String,
     required: true,
-    enum: ['Selofan', 'Rulon', 'Aksessuarlar'],
+    enum: ['Selofan', 'Rulon', 'Plastik', 'Qogoz', 'Aksessuarlar'],
     index: true
   },
   size: {

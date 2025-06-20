@@ -3,9 +3,13 @@ import { motion } from 'framer-motion';
 import { useCart } from '../App';
 import { toast } from 'react-toastify';
 import * as api from '../services/api';
+import { useLanguage } from '../contexts/LanguageContext';
+import { translations } from '../i18n/translations';
 
 const CheckoutPage = () => {
   const { cart, clearCart, getCartTotal } = useCart();
+  const { language } = useLanguage();
+  const t = translations[language];
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -28,26 +32,25 @@ const CheckoutPage = () => {
       [name]: value
     }));
   };
-
   const validateForm = () => {
     if (!formData.name.trim()) {
-      toast.error('Ism kiritilishi shart!');
+      toast.error(t.checkout.validation.nameRequired);
       return false;
     }
     if (!formData.phone.trim()) {
-      toast.error('Telefon raqam kiritilishi shart!');
+      toast.error(t.checkout.validation.phoneRequired);
       return false;
     }
     if (!formData.address.trim()) {
-      toast.error('Manzil kiritilishi shart!');
+      toast.error(t.checkout.validation.addressRequired);
       return false;
     }
     if (!formData.city.trim()) {
-      toast.error('Shahar kiritilishi shart!');
+      toast.error(t.checkout.validation.cityRequired);
       return false;
     }
     if (cart.length === 0) {
-      toast.error('Savat bo\'sh! Mahsulot qo\'shing!');
+      toast.error(t.checkout.validation.cartEmpty);
       return false;
     }
     return true;
@@ -101,7 +104,7 @@ const CheckoutPage = () => {
       
       console.log('Order response:', response);
       
-      toast.success('Buyurtma muvaffaqiyatli qabul qilindi!', { autoClose: 5000 });
+      toast.success(t.checkout.messages.orderSuccess, { autoClose: 5000 });
       clearCart();
       
       // Reset form
@@ -114,33 +117,31 @@ const CheckoutPage = () => {
         notes: '',
         paymentMethod: 'cash'
       });
-      
-    } catch (error) {
+        } catch (error) {
       console.error('Order error:', error);
-      toast.error(error.response?.data?.message || 'Buyurtma yuborishda xatolik!', { 
+      toast.error(error.response?.data?.message || t.checkout.messages.orderError, { 
         autoClose: 5000 
       });
     } finally {
       setIsLoading(false);
     }
   };
-
   if (cart.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="max-w-2xl mx-auto px-4 text-center">
           <div className="text-6xl mb-4">🛒</div>
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Savatcha Bo'sh
+            {t.checkout.emptyCart.title}
           </h1>
           <p className="text-gray-600 mb-8">
-            Buyurtma berish uchun avval mahsulot qo'shing
+            {t.checkout.emptyCart.description}
           </p>
           <a
             href="/products"
             className="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Mahsulotlarni Ko'rish
+            {t.checkout.emptyCart.viewProducts}
           </a>
         </div>
       </div>
@@ -154,12 +155,11 @@ const CheckoutPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
-        >
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Buyurtma Berish
+        >          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {t.checkout.title}
           </h1>
           <p className="text-gray-600">
-            Ma'lumotlaringizni to'ldiring va buyurtmani yakunlang
+            {t.checkout.subtitle}
           </p>
         </motion.div>
 
@@ -170,13 +170,12 @@ const CheckoutPage = () => {
             animate={{ opacity: 1, x: 0 }}
             className="bg-white rounded-lg shadow-md p-6"
           >
-            <h2 className="text-xl font-semibold mb-6">Buyurtma Ma'lumotlari</h2>
+            <h2 className="text-xl font-semibold mb-6">{t.checkout.form.title}</h2>
             
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Ism <span className="text-red-500">*</span>
+                    {t.checkout.form.name} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -184,14 +183,14 @@ const CheckoutPage = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Ismingizni kiriting"
+                    placeholder={t.checkout.form.namePlaceholder}
                     required
                   />
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Telefon <span className="text-red-500">*</span>
+                    {t.checkout.form.phone} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="tel"
@@ -203,11 +202,9 @@ const CheckoutPage = () => {
                     required
                   />
                 </div>
-              </div>
-
-              <div>
+              </div>              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email (ixtiyoriy)
+                  {t.checkout.form.email}
                 </label>
                 <input
                   type="email"
@@ -219,10 +216,9 @@ const CheckoutPage = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Shahar <span className="text-red-500">*</span>
+                    {t.checkout.form.city} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -230,14 +226,14 @@ const CheckoutPage = () => {
                     value={formData.city}
                     onChange={handleInputChange}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Toshkent"
+                    placeholder={t.checkout.form.cityPlaceholder}
                     required
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    To'lov usuli
+                    {t.checkout.form.paymentMethod}
                   </label>
                   <select
                     name="paymentMethod"
@@ -245,16 +241,14 @@ const CheckoutPage = () => {
                     onChange={handleInputChange}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="cash">Naqd pul</option>
-                    <option value="payme">Payme</option>
-                    <option value="click">Click</option>
+                    <option value="cash">{t.checkout.form.paymentOptions.cash}</option>
+                    <option value="payme">{t.checkout.form.paymentOptions.payme}</option>
+                    <option value="click">{t.checkout.form.paymentOptions.click}</option>
                   </select>
                 </div>
-              </div>
-
-              <div>
+              </div>              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  To'liq manzil <span className="text-red-500">*</span>
+                  {t.checkout.form.address} <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   name="address"
@@ -262,14 +256,14 @@ const CheckoutPage = () => {
                   onChange={handleInputChange}
                   rows={3}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="To'liq manzilni kiriting..."
+                  placeholder={t.checkout.form.addressPlaceholder}
                   required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Qo'shimcha izoh
+                  {t.checkout.form.notes}
                 </label>
                 <textarea
                   name="notes"
@@ -277,7 +271,7 @@ const CheckoutPage = () => {
                   onChange={handleInputChange}
                   rows={2}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Yetkazib berish uchun qo'shimcha ma'lumot..."
+                  placeholder={t.checkout.form.notesPlaceholder}
                 />
               </div>
 
@@ -289,14 +283,13 @@ const CheckoutPage = () => {
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-blue-600 hover:bg-blue-700'
                 }`}
-              >
-                {isLoading ? (
+              >                {isLoading ? (
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Buyurtma berilmoqda...
+                    {t.checkout.form.submitting}
                   </div>
                 ) : (
-                  'Buyurtmani Tasdiqlash'
+                  t.checkout.form.submit
                 )}
               </button>
             </form>
@@ -308,7 +301,7 @@ const CheckoutPage = () => {
             animate={{ opacity: 1, x: 0 }}
             className="bg-white rounded-lg shadow-md p-6"
           >
-            <h2 className="text-xl font-semibold mb-6">Buyurtma Xulasasi</h2>
+            <h2 className="text-xl font-semibold mb-6">{t.checkout.summary.title}</h2>
             
             <div className="space-y-4 mb-6">
               {cart.map((item) => (
@@ -328,7 +321,7 @@ const CheckoutPage = () => {
                   <div className="flex-1">
                     <h3 className="font-medium text-gray-900">{item.name}</h3>
                     <p className="text-sm text-gray-500">{item.size}</p>
-                    <p className="text-sm text-gray-500">Miqdor: {item.quantity}</p>
+                    <p className="text-sm text-gray-500">{t.checkout.summary.quantity}: {item.quantity}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">
@@ -337,29 +330,25 @@ const CheckoutPage = () => {
                   </div>
                 </div>
               ))}
-            </div>
-
-            <div className="space-y-2 pt-4 border-t">
+            </div>            <div className="space-y-2 pt-4 border-t">
               <div className="flex justify-between">
-                <span>Mahsulotlar:</span>
-                <span>{subtotal.toLocaleString()} so'm</span>
+                <span>{t.checkout.summary.products}:</span>
+                <span>{subtotal.toLocaleString()} {t.common.currency}</span>
               </div>
               <div className="flex justify-between">
-                <span>Yetkazib berish:</span>
-                <span>{deliveryFee.toLocaleString()} so'm</span>
+                <span>{t.checkout.summary.delivery}:</span>
+                <span>{deliveryFee.toLocaleString()} {t.common.currency}</span>
               </div>
               <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                <span>Jami:</span>
-                <span>{total.toLocaleString()} so'm</span>
+                <span>{t.checkout.summary.total}:</span>
+                <span>{total.toLocaleString()} {t.common.currency}</span>
               </div>
-            </div>
-
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <h3 className="font-medium text-blue-900 mb-2">Yetkazib berish ma'lumoti:</h3>
+            </div>            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+              <h3 className="font-medium text-blue-900 mb-2">{t.checkout.deliveryInfo.title}:</h3>
               <ul className="text-sm text-blue-700 space-y-1">
-                <li>• Yetkazib berish 1-3 ish kunida</li>
-                <li>• Bepul yetkazib berish 500,000 so'mdan yuqori</li>
-                <li>• To'lov: naqd yoki online</li>
+                <li>• {t.checkout.deliveryInfo.time}</li>
+                <li>• {t.checkout.deliveryInfo.freeDelivery}</li>
+                <li>• {t.checkout.deliveryInfo.payment}</li>
               </ul>
             </div>
           </motion.div>

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../App';
+import { useLanguage } from '../../contexts/LanguageContext';
+import LanguageSwitcher from '../UI/LanguageSwitcher';
 
 // Icons
 const MenuIcon = () => (
@@ -42,6 +44,25 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { getCartItemsCount } = useCart();
+  const { t, translations, language } = useLanguage();
+
+  // Xavfsizlik uchun translations mavjudligini tekshirish
+  const safeT = (key, fallback = key) => {
+    try {
+      if (!t || typeof t !== 'function') {
+        return fallback;
+      }
+      const result = t(key);
+      return result || fallback;
+    } catch (error) {
+      console.error('Translation error in Navbar:', error);
+      return fallback;
+    }
+  };
+
+  // Get current language safely
+  const currentLang = language || 'uz';
+  const currentTranslations = translations?.[currentLang] || {};
 
   // Handle scroll effect
   useEffect(() => {
@@ -67,13 +88,11 @@ const Navbar = () => {
       setSearchQuery('');
       setIsSearchOpen(false);
     }
-  };
-
-  const navLinks = [
-    { to: '/', label: 'Bosh Sahifa', active: location.pathname === '/' },
-    { to: '/products', label: 'Mahsulotlar', active: location.pathname.startsWith('/products') },
-    { to: '/about', label: 'Biz Haqimizda', active: location.pathname === '/about' },
-    { to: '/contact', label: 'Aloqa', active: location.pathname === '/contact' },
+  };  const navLinks = [
+    { to: '/', label: safeT('home', 'Bosh sahifa'), active: location.pathname === '/' },
+    { to: '/products', label: safeT('products', 'Mahsulotlar'), active: location.pathname.startsWith('/products') },
+    { to: '/about', label: safeT('about', 'Biz haqimizda'), active: location.pathname === '/about' },
+    { to: '/contact', label: safeT('contact', 'Aloqa'), active: location.pathname === '/contact' },
   ];
 
   const cartItemsCount = getCartItemsCount();
@@ -144,8 +163,7 @@ const Navbar = () => {
                     />
                   )}
                 </Link>
-              ))}
-            </div>
+              ))}            </div>
 
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center space-x-4">
@@ -157,6 +175,9 @@ const Navbar = () => {
               >
                 <SearchIcon />
               </button>
+
+              {/* Language Switcher */}
+              <LanguageSwitcher />
 
               {/* Cart Button */}
               <Link
@@ -178,6 +199,9 @@ const Navbar = () => {
 
             {/* Mobile menu button */}
             <div className="lg:hidden flex items-center space-x-2">
+              {/* Mobile Language Switcher */}
+              <LanguageSwitcher className="scale-90" />
+
               {/* Mobile Cart */}
               <Link
                 to="/cart"

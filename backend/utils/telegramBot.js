@@ -28,18 +28,21 @@ class TelegramBot {
       console.error('❌ Telegram send error:', error.response?.data || error.message);
       return false;
     }
-  }
+  }  async sendOrderNotification(order) {
+    if (!this.botToken || !this.chatId) {
+      console.warn('⚠️ Telegram bot not configured - skipping order notification');
+      return { success: false, reason: 'not_configured' };
+    }
 
-  async sendOrderNotification(order) {
-    const productsList = order.products.map(item => 
-      `• <b>${item.name}</b> (${item.size}) - ${item.quantity} ta × ${item.price.toLocaleString()} so'm`
-    ).join('\n');
+    try {
+      const productsList = order.products.map(item => 
+        `• <b>${item.name}</b> (${item.size}) - ${item.quantity} ta × ${item.price.toLocaleString()} so'm`
+      ).join('\n');
 
-    const message = `
-🛍 <b>YANGI BUYURTMA!</b>
+      const message = `🛍 <b>YANGI BUYURTMA!</b>
 
 📝 <b>Buyurtma raqami:</b> #${order.orderNumber}
-📅 <b>Sana:</b> ${new Date(order.timestamps.orderDate).toLocaleString('uz-UZ')}
+📅 <b>Sana:</b> ${new Date().toLocaleString('uz-UZ')}
 
 👤 <b>MIJOZ MA'LUMOTLARI:</b>
 • <b>Ism:</b> ${order.customer.name}
@@ -66,15 +69,24 @@ ${order.pricing.discount > 0 ? `• <b>Chegirma:</b> -${order.pricing.discount.t
 ${order.notes.customerNotes ? `📝 <b>Mijoz izohi:</b> ${order.notes.customerNotes}` : ''}
 
 ---
-🔗 Buyurtmani ko'rish: ${process.env.ADMIN_URL || 'Admin panel'}/orders/${order._id}
-    `;
+🔗 Buyurtmani ko'rish: ${process.env.ADMIN_URL || 'Admin panel'}/orders/${order._id}`;
 
-    return await this.sendMessage(message);
+      const result = await this.sendMessage(message);
+      console.log('✅ Telegram order notification sent successfully');
+      return { success: true, result };
+    } catch (error) {
+      console.error('❌ Telegram order notification failed:', error.message);
+      return { success: false, error: error.message };
+    }
   }
-
   async sendContactNotification(contact) {
-    const message = `
-📧 <b>YANGI MUROJAAT!</b>
+    if (!this.botToken || !this.chatId) {
+      console.warn('⚠️ Telegram bot not configured - skipping contact notification');
+      return { success: false, reason: 'not_configured' };
+    }
+
+    try {
+      const message = `📧 <b>YANGI MUROJAAT!</b>
 
 👤 <b>MIJOZ:</b>
 • <b>Ism:</b> ${contact.name}
@@ -91,10 +103,15 @@ ${contact.message}
 📅 <b>Sana:</b> ${new Date(contact.createdAt).toLocaleString('uz-UZ')}
 
 ---
-🔗 Javob berish: ${process.env.ADMIN_URL || 'Admin panel'}/contacts/${contact._id}
-    `;
+🔗 Javob berish: ${process.env.ADMIN_URL || 'Admin panel'}/contacts/${contact._id}`;
 
-    return await this.sendMessage(message);
+      const result = await this.sendMessage(message);
+      console.log('✅ Telegram contact notification sent successfully');
+      return { success: true, result };
+    } catch (error) {
+      console.error('❌ Telegram contact notification failed:', error.message);
+      return { success: false, error: error.message };
+    }
   }
 
   async sendOrderStatusUpdate(order, oldStatus, newStatus) {
