@@ -7,7 +7,11 @@ console.log('API Base URL:', API_BASE_URL); // Debug uchun
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
+<<<<<<< HEAD
   timeout: 30000, // 30 sekund
+=======
+  timeout: 60000,
+>>>>>>> e7b5deed4789e982bbdc154d2d995afd3ac9e94f
   headers: {
     'Content-Type': 'application/json',
   },
